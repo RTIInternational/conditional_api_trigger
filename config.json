@@ -12,9 +12,7 @@
             "institution": "RTI International"
         }
     ],
-    "compatibility": {
-        "redcap-version-min": "8.0.3"
-    },
+    "framework-version": 9,
     "project-settings": [
         {
             "key": "triggers",
