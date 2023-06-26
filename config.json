@@ -1,0 +1,96 @@
+{
+    "name": "Conditional API Trigger",
+    "namespace": "ConditionalAPITriggerModule",
+    "description": "Calls an API when a specific condition on a specific form has been met.",
+    "permissions": [
+        "redcap_save_record"
+    ],
+    "authors": [
+        {
+            "name": "David Leblond",
+            "email": "dleblond@rti.org",
+            "institution": "RTI International"
+        }
+    ],
+    "compatibility": {
+        "redcap-version-min": "8.0.3"
+    },
+    "project-settings": [
+        {
+            "key": "triggers",
+            "name": "Triggers",
+            "type": "sub_settings",
+            "repeatable": true,
+            "sub_settings" : [
+                {
+                    "key": "instrument",
+                    "name": "Instrument",
+                    "required": true,
+                    "type": "form-list"
+                },
+                {
+                    "key": "condition",
+                    "name": "Condition",
+                    "required": true,
+                    "type": "text"
+                },
+                {
+                    "key": "api_url",
+                    "name": "API URL",
+                    "required": true,
+                    "type": "text"
+                },
+                {
+                    "key": "api_method",
+                    "name": "API Method",
+                    "required": true,
+                    "type": "dropdown",
+                    "choices": [
+                        {
+                            "name": "GET",
+                            "value": "GET"
+                        },
+                        {
+                            "name": "POST",
+                            "value": "POST"
+                        }
+                    ]
+                },
+                {
+                    "key": "api_data",
+                    "name": "API Data",
+                    "required": false,
+                    "type": "textarea"
+                },
+                {
+                    "key": "api_header",
+                    "name": "API Header",
+                    "required": false,
+                    "type": "textarea"
+                },
+                {
+                    "key": "separate_post_data",
+                    "name": "Separate Post Data",
+                    "type": "checkbox"
+                },
+                {
+                    "key": "data_item_separator",
+                    "name": "Data Item Separator", 
+                    "required": false,
+                    "type": "text"
+                },
+                {
+                    "key": "data_value_separator",
+                    "name": "Data Value Separator",
+                    "required": false,
+                    "type": "text"
+                },
+                {
+                    "key": "run_once_field",
+                    "name": "Run Once Field",
+                    "type": "field-list"
+                }
+            ]
+        }
+    ]
+}
