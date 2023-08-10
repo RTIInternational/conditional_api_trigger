@@ -1,6 +1,9 @@
 # Conditional API Trigger
 A REDCap module that executes an API call (to any API) when a certain condition has been met upon saving a record.
 
+## Prerequisites
+- REDCap >= 8.0.3
+
 ## Manual Installation
 - Copy the provided module into the modules directory of your REDCap installation.  
 - Go to **Control Center > Manage External Modules** and enable Conditional API Trigger.

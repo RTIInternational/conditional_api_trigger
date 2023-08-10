@@ -1,6 +1,7 @@
 <?php
 
 namespace ConditionalAPITriggerModule;
+
 use \REDCap;
 use \Piping;
 
@@ -23,81 +24,94 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
         $valueSeparator = $this->getProjectSetting("data_value_separator");
         $useSeparator = $this->getProjectSetting("separate_post_data");
         $runOnceField = $this->getProjectSetting('run_once_field');
+        $resultField = $this->getProjectSetting('result_field');
+        $resultEvent = $this->getProjectSetting('result_event');
 
-        $formCount = count($apiForms);
+        if ($apiForms != null) {
 
-        // see if the form exists in the conditions link
-        for ($i = 0; $i < $formCount; $i++) {
-            if ($apiForms[$i] == $instrument)
-            {
-                $func = $apiConditions[$i];
-                $followThrough = false;
-                if ($Proj->isRepeatingEvent($event_id))
-                {
-                    $followThrough = REDCap::evaluateLogic($func, $project_id, $record, $event_id, $repeat_instance, $instrument);
-                }
-                else 
-                {
-                    $followThrough = REDCap::evaluateLogic($func, $project_id, $record, $event_id, $repeat_instance);
-                }
+            $formCount = count($apiForms);
 
-                if ($followThrough == true)
-                {
-                    // grab all of the data for use in piping
-                    $recordData = REDCap::getData($project_id, "array", $record);
+            // see if the form exists in the conditions link
+            for ($i = 0; $i < $formCount; $i++) {
+                if ($apiForms[$i] == $instrument) {
+                    $func = $apiConditions[$i];
+                    $followThrough = false;
+                    if ($Proj->isRepeatingEvent($event_id)) {
+                        $followThrough = REDCap::evaluateLogic($func, $project_id, $record, $event_id, $repeat_instance, $instrument);
+                    } else {
+                        $followThrough = REDCap::evaluateLogic($func, $project_id, $record, $event_id, $repeat_instance);
+                    }
 
-                    if ($runOnceField[$i] != '')
-                    {
+                    if ($followThrough == true) {
+                        // grab all of the data for use in piping
+                        $recordData = REDCap::getData($project_id, "array", $record);
+
                         $data = array();
-                        if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id))
-                        {
-                            $data[$record][$event_id][$runOnceField[$i]] = '1';
+
+                        if ($runOnceField[$i] != '') {
+                            
+                            if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
+                                $data[$record][$event_id][$runOnceField[$i]] = '1';
+                            } else if ($Proj->isRepeatingEvent($event_id)) {
+                                $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$runOnceField[$i]] = '1';
+                            } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
+                                $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$runOnceField[$i]] = '1';
+                            }
+                            
                         }
-                        else if ($Proj->isRepeatingEvent($event_id))
-                        {
-                            $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$runOnceField[$i]] = '1';
+
+                        if ($resultField[$i] != '') {
+                            if ($resultEvent[$i] == '') {
+                                if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
+                                    $data[$record][$event_id][$resultField[$i]] = $response;
+                                } else if ($Proj->isRepeatingEvent($event_id)) {
+                                    $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$resultField[$i]] = $response;
+                                } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
+                                    $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$resultField[$i]] = $response;
+                                }
+                            } else {
+                                $data[$record][$resultEvent[$i]][$resultField[$i]] = $response;
+                            }
                         }
-                        else if ($Proj->isRepeatingForm($event_id, $instrument))
-                        {
-                            $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$runOnceField[$i]] = '1';
-                        }
+
                         $params = array('project_id' => $project_id, 'data_format' => 'array', 'data' => $data);
-                        REDCap::saveData($params);
+                        if (sizeof($data) > 0) {
+                            REDCap::saveData($params);
+                        }
+
+                        // create the url
+                        $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+
+                        $method = $apiMethods[$i];
+
+                        $conn = curl_init($url);
+                        $formData = array();
+
+                        curl_setopt($conn, CURLOPT_RETURNTRANSFER, false);
+                        if ($apiData[$i] != "") {
+                            $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                            if ($useSeparator[$i] == "1") {
+                                $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
+                            }
+                            curl_setopt($conn, CURLOPT_POSTFIELDS, $formData);
+                        }
+
+                        if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
+                        $headerArr = array();
+                        if ($apiHeaders[$i] != "") {
+                            $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                            $headerArr = explode(";", $headers);
+                        }
+                        $headerArr[] = "Content-Length: " . strlen($formData);
+                        curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
+
+
+
+
+                        curl_exec($conn);
+                        curl_close($conn);
                     }
-
-                    // create the url
-                    $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-
-                    $method = $apiMethods[$i];
-
-                    $conn = curl_init($url);
-                    $formData = array();
-
-                    curl_setopt($conn, CURLOPT_RETURNTRANSFER, false);
-                    if ($apiData[$i] != "")
-                    {
-                        $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                        if ($useSeparator[$i] == "1") {$formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);}
-                        curl_setopt($conn, CURLOPT_POSTFIELDS, $formData);
-                    }
-
-                    if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
-                    $headerArr = array();
-                    if ($apiHeaders[$i] != "")
-                    {
-                        $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                        $headerArr = explode(";", $headers);
-                    }
-                    $headerArr[] = "Content-Length: " . strlen($formData);                       
-                    curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
-                    
-                
-                    
-
-                    curl_exec($conn);
-                    curl_close($conn);
                 }
-    
             }
         }
     }
@@ -106,15 +120,11 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
     {
         $formDataArr1 = explode($itemSeparator, $formData);
         $outputArr = array();
-        foreach ($formDataArr1 as $item)
-        {
+        foreach ($formDataArr1 as $item) {
             $parts = explode($valueSeparator, $item);
             $outputArr[trim($parts[0])] = trim($parts[1]);
         }
 
         return http_build_query($outputArr, '', '&');
-
     }
 }
-
-?>

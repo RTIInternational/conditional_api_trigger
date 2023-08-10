@@ -12,6 +12,9 @@
             "institution": "RTI International"
         }
     ],
+    "compatibility": {
+        "redcap-version-min": "8.0.3"
+    },
     "framework-version": 9,
     "project-settings": [
         {
@@ -87,6 +90,16 @@
                     "key": "run_once_field",
                     "name": "Run Once Field",
                     "type": "field-list"
+                },
+                {
+                    "key": "result_field",
+                    "name": "Result Field",
+                    "type": "field-list"
+                },
+                {
+                    "key": "result_event",
+                    "name": "Result Event",
+                    "type": "event-list"
                 }
             ]
         }
