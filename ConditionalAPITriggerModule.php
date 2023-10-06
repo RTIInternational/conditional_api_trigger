@@ -46,6 +46,39 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         // grab all of the data for use in piping
                         $recordData = REDCap::getData($project_id, "array", $record);
 
+
+                        // create the url
+                        $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+
+                        $method = $apiMethods[$i];
+
+                        $conn = curl_init($url);
+                        $formData = array();
+
+                        curl_setopt($conn, CURLOPT_RETURNTRANSFER, false);
+                        if ($apiData[$i] != "") {
+                            $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                            if ($useSeparator[$i] == "1") {
+                                $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
+                            }
+                            curl_setopt($conn, CURLOPT_POSTFIELDS, $formData);
+                        }
+
+                        if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
+                        $headerArr = array();
+                        if ($apiHeaders[$i] != "") {
+                            $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                            $headerArr = explode(";", $headers);
+                        }
+                        $headerArr[] = "Content-Length: " . strlen($formData);
+                        curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
+
+
+
+
+                        $response = curl_exec($conn);
+                        curl_close($conn);
+
                         $data = array();
 
                         if ($runOnceField[$i] != '') {
@@ -78,38 +111,6 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         if (sizeof($data) > 0) {
                             REDCap::saveData($params);
                         }
-
-                        // create the url
-                        $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-
-                        $method = $apiMethods[$i];
-
-                        $conn = curl_init($url);
-                        $formData = array();
-
-                        curl_setopt($conn, CURLOPT_RETURNTRANSFER, false);
-                        if ($apiData[$i] != "") {
-                            $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                            if ($useSeparator[$i] == "1") {
-                                $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
-                            }
-                            curl_setopt($conn, CURLOPT_POSTFIELDS, $formData);
-                        }
-
-                        if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
-                        $headerArr = array();
-                        if ($apiHeaders[$i] != "") {
-                            $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                            $headerArr = explode(";", $headers);
-                        }
-                        $headerArr[] = "Content-Length: " . strlen($formData);
-                        curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
-
-
-
-
-                        curl_exec($conn);
-                        curl_close($conn);
                     }
                 }
             }

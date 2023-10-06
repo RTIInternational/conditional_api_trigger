@@ -13,3 +13,7 @@
 - Added data item separators.  
 - Added ability to save API results to a field.  
 - Fixed issue where blank settings caused an error report.  
+
+## [1.2.1] - 2023-10-06  
+### Changed
+- Fised issue with result saving.  
