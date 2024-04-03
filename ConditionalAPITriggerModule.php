@@ -48,7 +48,7 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
 
 
                         // create the url
-                        $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                        $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
 
                         $method = $apiMethods[$i];
 
@@ -57,7 +57,7 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
 
                         curl_setopt($conn, CURLOPT_RETURNTRANSFER, false);
                         if ($apiData[$i] != "") {
-                            $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                            $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
                             if ($useSeparator[$i] == "1") {
                                 $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
                             }
@@ -67,7 +67,7 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
                         $headerArr = array();
                         if ($apiHeaders[$i] != "") {
-                            $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                            $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
                             $headerArr = explode(";", $headers);
                         }
                         $headerArr[] = "Content-Length: " . strlen($formData);
