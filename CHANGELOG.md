@@ -16,4 +16,8 @@
 
 ## [1.2.1] - 2023-10-06  
 ### Changed
-- Fised issue with result saving.  
+- Fixed issue with result saving.  
+
+## [1.2.2] - 2024-04-03  
+## Changed  
+- Made it so blank piped variables don't get replaced with ______ in the api calls.  
