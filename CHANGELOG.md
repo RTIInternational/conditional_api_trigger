@@ -21,3 +21,7 @@
 ## [1.2.2] - 2024-04-03  
 ## Changed  
 - Made it so blank piped variables don't get replaced with ______ in the api calls.  
+
+## [1.2.3] - 2024-05-31  
+## Changed  
+- Fixed another issue with result saving.  Fixes problem with response just coming through as "1".  

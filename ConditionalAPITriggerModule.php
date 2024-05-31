@@ -55,7 +55,7 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         $conn = curl_init($url);
                         $formData = array();
 
-                        curl_setopt($conn, CURLOPT_RETURNTRANSFER, false);
+                        curl_setopt($conn, CURLOPT_RETURNTRANSFER, true);
                         if ($apiData[$i] != "") {
                             $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
                             if ($useSeparator[$i] == "1") {
