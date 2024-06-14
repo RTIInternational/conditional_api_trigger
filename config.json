@@ -2,9 +2,6 @@
     "name": "Conditional API Trigger",
     "namespace": "ConditionalAPITriggerModule",
     "description": "Calls an API when a specific condition on a specific form has been met.",
-    "permissions": [
-        "redcap_save_record"
-    ],
     "authors": [
         {
             "name": "David Leblond",
