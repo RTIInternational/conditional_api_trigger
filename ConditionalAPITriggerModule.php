@@ -53,7 +53,7 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         $method = $apiMethods[$i];
 
                         $conn = curl_init($url);
-                        $formData = array();
+                        $formData = "";
 
                         curl_setopt($conn, CURLOPT_RETURNTRANSFER, true);
                         if ($apiData[$i] != "") {
