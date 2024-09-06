@@ -25,3 +25,7 @@
 ## [1.2.3] - 2024-05-31  
 ## Changed  
 - Fixed another issue with result saving.  Fixes problem with response just coming through as "1".  
+
+## [1.2.4] - 2024-09-06  
+## Changed  
+- Fixed an issue where form data that doesn't use separated data wasn't working.  
