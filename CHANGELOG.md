@@ -26,11 +26,11 @@
 ## Changed  
 - Fixed another issue with result saving.  Fixes problem with response just coming through as "1".  
 
-## [1.2.4] - 2024-09-06  
+## [1.2.5] - 2024-09-06  
 ## Changed  
 - Fixed an issue where form data that doesn't use separated data wasn't working.  
 
-## [1.2.5] - 2024-10-04  
+## [1.2.6] - 2024-10-04  
 ## Changed  
 - Added JSON Parsing.
 - Added fix for piping into filterLogic being messed up. See README.  
