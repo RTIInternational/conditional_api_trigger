@@ -26,6 +26,11 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
         $runOnceField = $this->getProjectSetting('run_once_field');
         $resultField = $this->getProjectSetting('result_field');
         $resultEvent = $this->getProjectSetting('result_event');
+        $jsonParsing = $this->getProjectSetting('json_parsing');
+        $jsonKey = $this->getProjectSetting('json_parsing_key');
+        $jsonIsArray = $this->getProjectSetting('json_is_array');
+        $jsonArrayIndex = $this->getProjectSetting('json_array_index');
+        $sanitizeBrackets = $this->getProjectSetting('sanitize_brackets');
 
         if ($apiForms != null) {
 
@@ -58,6 +63,11 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         curl_setopt($conn, CURLOPT_RETURNTRANSFER, true);
                         if ($apiData[$i] != "") {
                             $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
+                            if ($sanitizeBrackets[$i] == '1') {
+                                // replace {{ and }} with [ and ]
+                                $formData = str_replace('{{', '[', $formData);
+                                $formData = str_replace('}}', ']', $formData);
+                            }
                             if ($useSeparator[$i] == "1") {
                                 $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
                             }
@@ -68,6 +78,11 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         $headerArr = array();
                         if ($apiHeaders[$i] != "") {
                             $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
+                            if ($sanitizeBrackets[$i] == '1') {
+                                // replace {{ and }} with [ and ]
+                                $headers = str_replace('{{', '[', $headers);
+                                $headers = str_replace('}}', ']', $headers);
+                            }
                             $headerArr = explode(";", $headers);
                         }
                         $headerArr[] = "Content-Length: " . strlen($formData);
@@ -96,14 +111,14 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         if ($resultField[$i] != '') {
                             if ($resultEvent[$i] == '') {
                                 if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
-                                    $data[$record][$event_id][$resultField[$i]] = $response;
+                                    $data[$record][$event_id][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
                                 } else if ($Proj->isRepeatingEvent($event_id)) {
-                                    $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$resultField[$i]] = $response;
+                                    $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
                                 } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
-                                    $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$resultField[$i]] = $response;
+                                    $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
                                 }
                             } else {
-                                $data[$record][$resultEvent[$i]][$resultField[$i]] = $response;
+                                $data[$record][$resultEvent[$i]][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
                             }
                         }
 
@@ -114,6 +129,20 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                     }
                 }
             }
+        }
+    }
+
+    private function parseResponse($response, $jsonParsing, $jsonKey, $jsonIsArray, $jsonArrayIndex)
+    {
+        if ($jsonParsing == '1') {
+            $response = json_decode($response, true);
+            if ($jsonIsArray == '1') {
+                return $response[$jsonArrayIndex][$jsonKey];
+            } else {
+                return $response[$jsonKey];
+            }
+        } else {
+            return $response;
         }
     }
 

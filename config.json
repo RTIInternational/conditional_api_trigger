@@ -97,6 +97,31 @@
                     "key": "result_event",
                     "name": "Result Event",
                     "type": "event-list"
+                },
+                {
+                    "key": "json_parsing",
+                    "name": "Do simple JSON parsing?",
+                    "type": "checkbox"
+                },
+                {
+                    "key": "json_parsing_key",
+                    "name": "JSON Parsing Key",
+                    "type": "text"
+                },
+                {
+                    "key": "json_is_array",
+                    "name": "JSON Output is an array?",
+                    "type": "checkbox"
+                },
+                {
+                    "key": "json_array_index",
+                    "name": "JSON Array Index (0 based)",
+                    "type": "text"
+                },
+                {
+                    "key": "sanitize_brackets",
+                    "name": "Replace {{ }} with [ ] after piping?",
+                    "type": "checkbox"
                 }
             ]
         }
