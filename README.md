@@ -13,7 +13,7 @@ You can define multiple triggers in **Project Settings**. For each trigger, defi
 - **Instrument** (required)- This is the instrument that the trigger will fire upon saving.  
 - **Condition** (required)- This is the condition (in addition to the above instrument being saved) that will cause the trigger to fire. This field should evaluate to true/false.  
 - **API URL** (required)- This is full API URL of the API request. You can pipe variables and smart tags in here.
-- **API Method** (requierd)- The HTTP method to use in your API request. (GET or POST)  
+- **API Method** (required)- The HTTP method to use in your API request. (GET or POST)  
 - **API Data** - This is a string to use in the POST data for your request. This should be formatted however the API expects it. You can pipe variables and smart tags in here.  
 - **API Header** - This is a string to use in the header for your request. This should be formatted however the API expects it. You can pipe variables and smart tags in here.  
 - **Separate Post Data** - Determine whether or not the system should take the API data and split it out in the system.  
