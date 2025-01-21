@@ -54,6 +54,8 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
 
                         // create the url
                         $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
+                        // not sure why we'd ever want to have dates in the url but I'm CMA here
+                        $url = $this->replaceYMD($url);
 
                         $method = $apiMethods[$i];
 
@@ -63,6 +65,8 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         curl_setopt($conn, CURLOPT_RETURNTRANSFER, true);
                         if ($apiData[$i] != "") {
                             $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
+                            $formData = $this->replaceYMD($formData);
+                            $formData = $this->replaceSlashes($formData);
                             if ($sanitizeBrackets[$i] == '1') {
                                 // replace {{ and }} with [ and ]
                                 $formData = str_replace('{{', '[', $formData);
@@ -78,6 +82,8 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         $headerArr = array();
                         if ($apiHeaders[$i] != "") {
                             $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, false, $project_id, false);
+                            $headers = $this->replaceYMD($headers);
+                            $headers = $this->replaceSlashes($headers);
                             if ($sanitizeBrackets[$i] == '1') {
                                 // replace {{ and }} with [ and ]
                                 $headers = str_replace('{{', '[', $headers);
@@ -129,6 +135,41 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                     }
                 }
             }
+        }
+    }
+
+    // looks for convertMDYtoYMD() and converts the containing data to that date
+    private function replaceYMD($formData)
+    {
+        $begin = strpos($formData, "convertMDYtoYMD(");
+        if ($begin === false)
+        {
+            return $formData;
+        }
+        else
+        {
+            $end = strpos($formData, ")", $begin);
+            $toconvert = substr($formData, $begin + 16, $end - ($begin+16));
+            $date = date_create_from_format("m-d-Y", $toconvert);
+            $date = date_format($date, "Y-m-d");
+            return $this->replaceYMD(substr_replace($formData, $date, $begin, ($end - $begin + 1)));
+        }
+    }
+
+    // looks for addSlashes<<<>>> and adds slashes to the containing data. Not using () to keep from mucking things up when parenthesis appears in the code
+    private function replaceSlashes($formData)
+    {
+        $begin = strpos($formData, "addSlashes<<<");
+        if ($begin === false)
+        {
+            return $formData;
+        }
+        else
+        {
+            $end = strpos($formData, ">>>", $begin);
+            $toconvert = substr($formData, $begin + 13, $end - ($begin+13));
+            $toconvert = addslashes($toconvert);
+            return $this->replaceSlashes(substr_replace($formData, $toconvert, $begin, ($end - $begin + 3)));
         }
     }
 

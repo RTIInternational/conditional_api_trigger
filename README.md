@@ -10,6 +10,7 @@ A REDCap module that executes an API call (to any API) when a certain condition 
 
 ## How to use
 You can define multiple triggers in **Project Settings**. For each trigger, define:  
+- **Label** - This is a label so you can describe what the trigger does.  
 - **Instrument** (required)- This is the instrument that the trigger will fire upon saving.  
 - **Condition** (required)- This is the condition (in addition to the above instrument being saved) that will cause the trigger to fire. This field should evaluate to true/false.  
 - **API URL** (required)- This is full API URL of the API request. You can pipe variables and smart tags in here.
@@ -47,3 +48,9 @@ This example imports a value into another REDCap project.
 **Separate Post Data** `Checked`  
 **Data Item Separator** `;`  
 **Data Value Separator** `=`  
+
+## Date Conversion  
+In order to convert anything in the **API Data** or **API Header** from MM-DD-YYYY to YYYY-MM-DDDD, wrap the piped in variable in `convertMDYtoYMD()`. This function call will be removed when the data is actually sent to the API.  
+
+## Add Slashes  
+If you have quotes in your data, this can mess up the API call if the data is being placed into JSON. If this is the case, wrap the piped in variable in `addSlashes<<< >>>` (I use triple angle brackets because it's possible that the data will have parenthesis.)  This will escape the quotation marks so they shouldn't cause issues.  

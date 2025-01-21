@@ -34,3 +34,9 @@
 ## Changed  
 - Added JSON Parsing.
 - Added fix for piping into filterLogic being messed up. See README.  
+
+## [1.3.0] - 2025-01-21  
+## Changed  
+- Added a descriptive label in the configuration so you can keep up with your triggers better.  
+- Added the ability to convert MDY days to YMD for REDCap importing.  
+- Added the ability to insert escaping for quotes.  
