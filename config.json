@@ -21,6 +21,11 @@
             "repeatable": true,
             "sub_settings" : [
                 {
+                    "key": "label",
+                    "name": "Label",
+                    "type": "text"
+                },
+                {
                     "key": "instrument",
                     "name": "Instrument",
                     "required": true,
