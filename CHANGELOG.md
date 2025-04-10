@@ -40,3 +40,7 @@
 - Added a descriptive label in the configuration so you can keep up with your triggers better.  
 - Added the ability to convert MDY days to YMD for REDCap importing.  
 - Added the ability to insert escaping for quotes.  
+
+## [1.4.0] - 2025-04-10  
+## Changed  
+- Added a last-run date timestamp feature.  

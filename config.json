@@ -127,6 +127,16 @@
                     "key": "sanitize_brackets",
                     "name": "Replace {{ }} with [ ] after piping?",
                     "type": "checkbox"
+                },
+                {
+                    "key": "last_run_date_field",
+                    "name": "Last Run Date Field",
+                    "type": "field-list"
+                },
+                {
+                    "key": "last_run_date_event",
+                    "name": "Last Run Date Event",
+                    "type": "event-list"
                 }
             ]
         }

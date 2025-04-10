@@ -31,6 +31,8 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
         $jsonIsArray = $this->getProjectSetting('json_is_array');
         $jsonArrayIndex = $this->getProjectSetting('json_array_index');
         $sanitizeBrackets = $this->getProjectSetting('sanitize_brackets');
+        $lastRunDateField = $this->getProjectSetting('last_run_date_field');
+        $lastRunDateEvent = $this->getProjectSetting('last_run_date_event');
 
         if ($apiForms != null) {
 
@@ -94,16 +96,13 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         $headerArr[] = "Content-Length: " . strlen($formData);
                         curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
 
-
-
-
                         $response = curl_exec($conn);
                         curl_close($conn);
 
                         $data = array();
 
                         if ($runOnceField[$i] != '') {
-                            
+
                             if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
                                 $data[$record][$event_id][$runOnceField[$i]] = '1';
                             } else if ($Proj->isRepeatingEvent($event_id)) {
@@ -111,7 +110,6 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                             } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
                                 $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$runOnceField[$i]] = '1';
                             }
-                            
                         }
 
                         if ($resultField[$i] != '') {
@@ -125,6 +123,27 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                                 }
                             } else {
                                 $data[$record][$resultEvent[$i]][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
+                            }
+                        }
+
+                        // write the current date/(time?) to the last run date field
+                        if ($lastRunDateField[$i] != '' && $lastRunDateEvent[$i] != '') {
+                            $field_info = $Proj->metadata[$lastRunDateField[$i]];
+                            $value = "";
+                            if (substr($field_info['element_validation_type'], 0, 5) == "date_")
+                            {
+                                $value = date("Y-m-d");
+                            }
+                            else
+                            {
+                                $value = date("Y-m-d H:i:s");
+                            }
+                            if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
+                                $data[$record][$lastRunDateEvent[$i]][$lastRunDateField[$i]] = $value;
+                            } else if ($Proj->isRepeatingEvent($event_id)) {
+                                $data[$record]['repeat_instances'][$lastRunDateEvent[$i]][''][$repeat_instance][$lastRunDateField[$i]] = $value;
+                            } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
+                                $data[$record]['repeat_instances'][$lastRunDateEvent[$i]][$instrument][$repeat_instance][$lastRunDateField[$i]] = $value;
                             }
                         }
 
@@ -142,14 +161,11 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
     private function replaceYMD($formData)
     {
         $begin = strpos($formData, "convertMDYtoYMD(");
-        if ($begin === false)
-        {
+        if ($begin === false) {
             return $formData;
-        }
-        else
-        {
+        } else {
             $end = strpos($formData, ")", $begin);
-            $toconvert = substr($formData, $begin + 16, $end - ($begin+16));
+            $toconvert = substr($formData, $begin + 16, $end - ($begin + 16));
             $date = date_create_from_format("m-d-Y", $toconvert);
             $date = date_format($date, "Y-m-d");
             return $this->replaceYMD(substr_replace($formData, $date, $begin, ($end - $begin + 1)));
@@ -160,14 +176,11 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
     private function replaceSlashes($formData)
     {
         $begin = strpos($formData, "addSlashes<<<");
-        if ($begin === false)
-        {
+        if ($begin === false) {
             return $formData;
-        }
-        else
-        {
+        } else {
             $end = strpos($formData, ">>>", $begin);
-            $toconvert = substr($formData, $begin + 13, $end - ($begin+13));
+            $toconvert = substr($formData, $begin + 13, $end - ($begin + 13));
             $toconvert = addslashes($toconvert);
             return $this->replaceSlashes(substr_replace($formData, $toconvert, $begin, ($end - $begin + 3)));
         }
