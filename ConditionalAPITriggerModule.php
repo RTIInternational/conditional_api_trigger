@@ -166,6 +166,10 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
         } else {
             $end = strpos($formData, ")", $begin);
             $toconvert = substr($formData, $begin + 16, $end - ($begin + 16));
+            // if $toconvert is blank, don't convert the date just make it blank
+            if (trim($toconvert) == "") {
+                return $this->replaceYMD(substr_replace($formData, "", $begin, ($end - $begin + 1)));
+            }
             $date = date_create_from_format("m-d-Y", $toconvert);
             $date = date_format($date, "Y-m-d");
             return $this->replaceYMD(substr_replace($formData, $date, $begin, ($end - $begin + 1)));

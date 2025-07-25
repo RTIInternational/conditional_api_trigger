@@ -44,3 +44,7 @@
 ## [1.4.0] - 2025-04-10  
 ## Changed  
 - Added a last-run date timestamp feature.  
+
+## [1.4.1] - 2025-07-25  
+## Changed  
+- Fixed issue where passing an empty date to the date conversion function was causing it to die.  
