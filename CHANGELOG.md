@@ -19,32 +19,36 @@
 - Fixed issue with result saving.  
 
 ## [1.2.2] - 2024-04-03  
-## Changed  
+### Changed  
 - Made it so blank piped variables don't get replaced with ______ in the api calls.  
 
 ## [1.2.3] - 2024-05-31  
-## Changed  
+### Changed  
 - Fixed another issue with result saving.  Fixes problem with response just coming through as "1".  
 
 ## [1.2.5] - 2024-09-06  
-## Changed  
+### Changed  
 - Fixed an issue where form data that doesn't use separated data wasn't working.  
 
 ## [1.2.6] - 2024-10-04  
-## Changed  
+### Changed  
 - Added JSON Parsing.
 - Added fix for piping into filterLogic being messed up. See README.  
 
 ## [1.3.0] - 2025-01-21  
-## Changed  
+### Changed  
 - Added a descriptive label in the configuration so you can keep up with your triggers better.  
 - Added the ability to convert MDY days to YMD for REDCap importing.  
 - Added the ability to insert escaping for quotes.  
 
 ## [1.4.0] - 2025-04-10  
-## Changed  
+### Changed  
 - Added a last-run date timestamp feature.  
 
 ## [1.4.1] - 2025-07-25  
-## Changed  
+### Changed  
 - Fixed issue where passing an empty date to the date conversion function was causing it to die.  
+
+## [2.0.0] - 2025-09-25  
+### Changed  
+- Added hourly cron job runs!  

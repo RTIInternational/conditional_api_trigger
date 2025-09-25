@@ -137,8 +137,22 @@
                     "key": "last_run_date_event",
                     "name": "Last Run Date Event",
                     "type": "event-list"
-                }
+                },
+                {
+                    "key": "run_hourly",
+                    "name": "Run Hourly",
+                    "type": "checkbox"
+                }  
             ]
         }
+    ],
+    "crons": [
+		{
+			"cron_name": "hourlytrigger",
+			"cron_description": "Runs selected API triggers every hour.",
+			"method": "hourlyTrigger",
+			"cron_frequency": "3600",
+			"cron_max_run_time": "3600"
+		}
     ]
 }
