@@ -52,3 +52,4 @@
 ## [2.0.0] - 2025-09-25  
 ### Changed  
 - Added hourly cron job runs!  
+- Added the ability to pick json array elements without needing a key.  

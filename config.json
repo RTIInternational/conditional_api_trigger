@@ -94,6 +94,11 @@
                     "type": "field-list"
                 },
                 {
+                    "key": "run_once_event",
+                    "name": "Run Once Event",
+                    "type": "event-list"
+                },
+                {
                     "key": "result_field",
                     "name": "Result Field",
                     "type": "field-list"

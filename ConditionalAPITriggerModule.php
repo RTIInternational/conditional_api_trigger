@@ -24,6 +24,7 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
         $valueSeparator = $this->getProjectSetting("data_value_separator");
         $useSeparator = $this->getProjectSetting("separate_post_data");
         $runOnceField = $this->getProjectSetting('run_once_field');
+        $runOnceEvent = $this->getProjectSetting('run_once_event');
         $resultField = $this->getProjectSetting('result_field');
         $resultEvent = $this->getProjectSetting('result_event');
         $jsonParsing = $this->getProjectSetting('json_parsing');
@@ -102,13 +103,17 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         $data = array();
 
                         if ($runOnceField[$i] != '') {
+                            $runOnceEventId = $event_id;
+                            if ($runOnceEvent[$i] != '') {
+                                $runOnceEventId = $runOnceEvent[$i];
+                            }
 
-                            if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
-                                $data[$record][$event_id][$runOnceField[$i]] = '1';
-                            } else if ($Proj->isRepeatingEvent($event_id)) {
-                                $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$runOnceField[$i]] = '1';
-                            } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
-                                $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$runOnceField[$i]] = '1';
+                            if (!$Proj->isRepeatingForm($runOnceEventId, $instrument) && !$Proj->isRepeatingEvent($runOnceEventId)) {
+                                $data[$record][$runOnceEventId][$runOnceField[$i]] = '1';
+                            } else if ($Proj->isRepeatingEvent($runOnceEventId)) {
+                                $data[$record]['repeat_instances'][$runOnceEventId][''][$repeat_instance][$runOnceField[$i]] = '1';
+                            } else if ($Proj->isRepeatingForm($runOnceEventId, $instrument)) {
+                                $data[$record]['repeat_instances'][$runOnceEventId][$instrument][$repeat_instance][$runOnceField[$i]] = '1';
                             }
                         }
 
@@ -130,12 +135,9 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         if ($lastRunDateField[$i] != '' && $lastRunDateEvent[$i] != '') {
                             $field_info = $Proj->metadata[$lastRunDateField[$i]];
                             $value = "";
-                            if (substr($field_info['element_validation_type'], 0, 5) == "date_")
-                            {
+                            if (substr($field_info['element_validation_type'], 0, 5) == "date_") {
                                 $value = date("Y-m-d");
-                            }
-                            else
-                            {
+                            } else {
                                 $value = date("Y-m-d H:i:s");
                             }
                             if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
@@ -204,45 +206,45 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
 
                 foreach ($records as $record => $recordIdData) {
                     // grab all of the data for use in piping
-                        $recordData = REDCap::getData($project_id, "array", $record);
-                    
-                        $event_id = $Proj->firstEventId;
-                        $repeat_instance = 1;
+                    $recordData = REDCap::getData($project_id, "array", $record);
 
-                        // create the url
-                        $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                        // not sure why we'd ever want to have dates in the url but I'm CMA here
-                        $url = $this->replaceYMD($url);
+                    $event_id = $Proj->firstEventId;
+                    $repeat_instance = 1;
 
-                        $method = $apiMethods[$i];
+                    // create the url
+                    $url = Piping::replaceVariablesInLabel($apiUrls[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                    // not sure why we'd ever want to have dates in the url but I'm CMA here
+                    $url = $this->replaceYMD($url);
 
-                        $conn = curl_init($url);
+                    $method = $apiMethods[$i];
 
-                        if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
+                    $conn = curl_init($url);
 
-                        curl_setopt($conn, CURLOPT_RETURNTRANSFER, true); // AM: changed from false for NPH
-                        $formData = "";
-                        if ($apiData[$i] != "") {
-                            $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                            $formData = $this->replaceYMD($formData);
-                            $formData = $this->replaceSlashes($formData);
-                            if ($useSeparator[$i] == "1") {
-                                $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
-                            }
-                            curl_setopt($conn, CURLOPT_POSTFIELDS, $formData);
-                        }
+                    if ($method == "POST") curl_setopt($conn, CURLOPT_POST, 1);
 
-                        $headerArr = array();
-                        if ($apiHeaders[$i] != "") {
-                            $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
-                            $headers = $this->replaceYMD($headers);
-                            $headers = $this->replaceSlashes($headers);
-                            $headerArr = explode(";", $headers); // AM: added for NPH
-                        }
+                    curl_setopt($conn, CURLOPT_RETURNTRANSFER, true); // AM: changed from false for NPH
+                    $formData = "";
+                    if ($apiData[$i] != "") {
+                        $formData = Piping::replaceVariablesInLabel($apiData[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                        $formData = $this->replaceYMD($formData);
+                        $formData = $this->replaceSlashes($formData);
                         if ($useSeparator[$i] == "1") {
-                            $headerArr[] = "Content-Length: " . strlen($formData);
+                            $formData = $this->buildPostArray($formData, ($itemSeparator[$i] == "" ? ";" : $itemSeparator[$i]), $valueSeparator[$i] == "" ? "=" : $valueSeparator[$i]);
                         }
-                        curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
+                        curl_setopt($conn, CURLOPT_POSTFIELDS, $formData);
+                    }
+
+                    $headerArr = array();
+                    if ($apiHeaders[$i] != "") {
+                        $headers = Piping::replaceVariablesInLabel($apiHeaders[$i], $record, $event_id, $repeat_instance, $recordData, true, $project_id, false);
+                        $headers = $this->replaceYMD($headers);
+                        $headers = $this->replaceSlashes($headers);
+                        $headerArr = explode(";", $headers); // AM: added for NPH
+                    }
+                    if ($useSeparator[$i] == "1") {
+                        $headerArr[] = "Content-Length: " . strlen($formData);
+                    }
+                    curl_setopt($conn, CURLOPT_HTTPHEADER, $headerArr);
 
                     $response = curl_exec($conn);
                     curl_close($conn);
@@ -250,8 +252,8 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                     $data = array();
 
                     if ($runOnceField[$i] != '' && $runOnceEvent[$i] != '') {
-                            
-                        $data[$record][$runOnceEvent[$i]][$runOnceField[$i]] = '1';        
+
+                        $data[$record][$runOnceEvent[$i]][$runOnceField[$i]] = '1';
                     }
 
                     if ($resultField[$i] != '' && $resultEvent[$i] != '') {
@@ -262,13 +264,9 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                     if (sizeof($data) > 0) {
                         REDCap::saveData($params);
                     }
-
                 }
-                
             }
         }
-
-
     }
 
     // looks for convertMDYtoYMD() and converts the containing data to that date
@@ -309,9 +307,17 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
         if ($jsonParsing == '1') {
             $response = json_decode($response, true);
             if ($jsonIsArray == '1') {
-                return $response[$jsonArrayIndex][$jsonKey];
+                if ($jsonKey == '') {
+                    return $response[$jsonArrayIndex];
+                } else {
+                    return $response[$jsonArrayIndex][$jsonKey];
+                }
             } else {
-                return $response[$jsonKey];
+                if ($jsonKey == '') {
+                    return $response;
+                } else {
+                    return $response[$jsonKey];
+                }
             }
         } else {
             return $response;
