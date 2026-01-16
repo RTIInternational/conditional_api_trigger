@@ -118,16 +118,16 @@ class ConditionalAPITriggerModule extends AbstractExternalModule
                         }
 
                         if ($resultField[$i] != '') {
-                            if ($resultEvent[$i] == '') {
-                                if (!$Proj->isRepeatingForm($event_id, $instrument) && !$Proj->isRepeatingEvent($event_id)) {
-                                    $data[$record][$event_id][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
-                                } else if ($Proj->isRepeatingEvent($event_id)) {
-                                    $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
-                                } else if ($Proj->isRepeatingForm($event_id, $instrument)) {
-                                    $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
-                                }
-                            } else {
-                                $data[$record][$resultEvent[$i]][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
+                            $resultEventId = $event_id;
+                            if ($resultEvent[$i] != '') {
+                                $resultEventId = $resultEvent[$i];
+                            }
+                            if (!$Proj->isRepeatingForm($resultEventId, $instrument) && !$Proj->isRepeatingEvent($resultEventId)) {
+                                $data[$record][$resultEventId][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
+                            } else if ($Proj->isRepeatingEvent($resultEventId)) {
+                                $data[$record]['repeat_instances'][$resultEventId][''][$repeat_instance][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
+                            } else if ($Proj->isRepeatingForm($resultEventId, $instrument)) {
+                                $data[$record]['repeat_instances'][$resultEventId][$instrument][$repeat_instance][$resultField[$i]] = $this->parseResponse($response, $jsonParsing[$i], $jsonKey[$i], $jsonIsArray[$i], $jsonArrayIndex[$i]);
                             }
                         }
 
