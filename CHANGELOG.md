@@ -53,3 +53,7 @@
 ### Changed  
 - Added hourly cron job runs!  
 - Added the ability to pick json array elements without needing a key.  
+
+## [2.0.1] - 2026-01-16  
+### Changed  
+- Fixed issue where results weren't being saved on repeating instruments or events.  
